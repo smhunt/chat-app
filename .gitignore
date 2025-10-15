@@ -24,3 +24,9 @@ pnpm-debug.log*
 *.local
 coverage/
 *.swp
+
+# Runtime logs and pids
+logs/
+*.pid
+frontend/vite.log
+server.log

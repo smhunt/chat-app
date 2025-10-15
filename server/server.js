@@ -2,6 +2,7 @@ import express from 'express'
 import http from 'http'
 import { WebSocketServer } from 'ws'
 import cors from 'cors'
+import * as rooms from './rooms.js'
 
 const app = express()
 app.use(cors())
@@ -11,63 +12,56 @@ app.get('/health', (_, res) => res.send('ok'))
 const server = http.createServer(app)
 const wss = new WebSocketServer({ server })
 
-const rooms = new Map() // roomId -> { clients:Set<ws>, history:[] , typing:Set<string> }
-
-function getRoom(id) {
-  if (!rooms.has(id)) rooms.set(id, { clients: new Set(), history: [], typing: new Set() })
-  return rooms.get(id)
-}
-
 wss.on('connection', (ws) => {
-  let joinedRoom = null
+  let joinedRoomId = null
 
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data.toString())
       if (msg.type === 'join') {
-        const room = getRoom(msg.conversationId || 'general')
-        room.clients.add(ws)
-        joinedRoom = room
-        ws.send(JSON.stringify({ type: 'history', payload: room.history }))
+        const id = msg.conversationId || 'general'
+        rooms.addClient(id, ws)
+        joinedRoomId = id
+        ws.send(JSON.stringify({ type: 'history', payload: rooms.getHistory(id) }))
       } else if (msg.type === 'message') {
-        const payload = {
-          text: msg.payload.text ?? '',
-          author: msg.payload.author ?? 'Guest',
-          conversationId: msg.payload.conversationId ?? 'general',
-          timestamp: Date.now()
-        }
-        const room = getRoom(payload.conversationId)
-        room.history.push(payload)
-        for (const client of room.clients) {
+        const raw = msg.payload || {}
+        const payload = rooms.addMessage(raw.conversationId || 'general', {
+          text: raw.text,
+          author: raw.author
+        })
+        // broadcast to clients in room
+        const clients = rooms.getClients(payload.conversationId)
+        for (const client of clients) {
           if (client.readyState === 1) client.send(JSON.stringify({ type: 'message', payload }))
         }
       } else if (msg.type === 'typing') {
         const { author, conversationId } = msg.payload || {}
-        const room = getRoom(conversationId || 'general')
+        const id = conversationId || 'general'
         if (author) {
-          room.typing.add(author)
-          // broadcast typing users, then clear after 2s
-          const users = Array.from(room.typing)
-          for (const client of room.clients) {
+          rooms.addTyping(id, author)
+          const users = rooms.getTyping(id)
+          const clients = rooms.getClients(id)
+          for (const client of clients) {
             if (client.readyState === 1) client.send(JSON.stringify({ type: 'typing', payload: users }))
           }
           setTimeout(() => {
-            room.typing.delete(author)
-            const users2 = Array.from(room.typing)
-            for (const client of room.clients) {
+            rooms.removeTyping(id, author)
+            const users2 = rooms.getTyping(id)
+            for (const client of clients) {
               if (client.readyState === 1) client.send(JSON.stringify({ type: 'typing', payload: users2 }))
             }
           }, 2000)
         }
       }
     } catch (e) {
+      // guard: don't let a bad client crash the server
       console.error('bad message', e)
     }
   })
 
   ws.on('close', () => {
-    if (!joinedRoom) return
-    joinedRoom.clients.delete(ws)
+    // remove socket from any rooms it may be in
+    rooms.removeClientFromAll(ws)
   })
 })
 

@@ -1,0 +1,53 @@
+name: MR Review (LLM template)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          git diff --no-color origin/${{ github.event.pull_request.base.ref }}...HEAD > pr.diff || true
+          echo "diff<<EOF" >> $GITHUB_OUTPUT
+          cat pr.diff >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Optionally collect CI logs (placeholder)
+        id: ci_logs
+        run: |
+          # Replace with steps to collect build/test logs from your CI or artifact store
+          echo "" > ci.log
+          echo "logs<<EOF" >> $GITHUB_OUTPUT
+          cat ci.log >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Call LLM review (template)
+        env:
+          LLM_ENDPOINT: ${{ secrets.LLM_ENDPOINT }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: |
+          echo "Posting PR to LLM (template)."
+          # This is a template. Implement the call that matches your LLM provider.
+          # Example using curl (replace with provider SDK as needed):
+          # curl -s -X POST "$LLM_ENDPOINT" -H "Authorization: Bearer $LLM_API_KEY" \
+          #   -H "Content-Type: application/json" \
+          #   -d '{"prompt":"<SYSTEM PROMPT HERE>","input":"'"$(sed -n '1,200p' pr.diff | jq -R -s -c '.')"'"}'
+          echo "LLM call skipped in template. Set secrets.LLM_ENDPOINT and secrets.LLM_API_KEY and implement the request."
+
+      - name: Post review comment (manual step)
+        if: always()
+        run: |
+          echo "Add a step to post the LLM response as a PR comment or create GitHub review."
+
+# Notes:
+# - This workflow is a template. Replace the LLM call with your provider's SDK or API.
+# - Avoid sending secrets or large diffs to third-party services without approval.
+# - Consider using the concise or security-first prompt variants in `.github/chatmodes/variants.md`.

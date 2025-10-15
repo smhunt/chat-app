@@ -10,8 +10,15 @@ export default function ChatWindow({ conversationId }) {
   const { user } = useAuth()
   const [typingUsers, setTypingUsers] = useState([])
 
+  // Default to backend websocket port (3001) when no explicit VITE_WS_URL is set.
+  // Using location.host caused the client to attempt to connect to the Vite dev server (5173)
+  // which does not accept app WebSocket connections.
+  const defaultHost = (typeof window !== 'undefined') ? location.hostname : 'localhost'
+  const defaultWs = ((typeof window !== 'undefined' && location.protocol === 'https:') ? 'wss://' : 'ws://') + defaultHost + ':3001'
+  const wsUrl = import.meta.env.VITE_WS_URL || defaultWs
+
   const { messages, sendMessage, sendTyping, status } = useWebSocket({
-    url: 'ws://localhost:3001',
+    url: wsUrl,
     conversationId,
     onTyping(users) { setTypingUsers(users) }
   })

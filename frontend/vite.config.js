@@ -5,5 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173
-  }
-})
+  },
+  // what does -- host do
+  // https://vitejs.dev/config/server-options.html#server-host
+  })

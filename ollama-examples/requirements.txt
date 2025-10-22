@@ -1,0 +1,16 @@
+# Ollama Python Examples - Dependencies
+
+# Core Ollama library
+ollama>=0.4.7
+
+# Optional but useful for some examples
+requests>=2.31.0
+
+# For async examples (already included in Python 3.7+)
+# asyncio is built-in
+
+# Optional: for better terminal output
+# colorama>=0.4.6
+
+# Optional: for type checking during development
+# typing-extensions>=4.8.0

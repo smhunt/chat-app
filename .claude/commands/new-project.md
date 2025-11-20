@@ -23,19 +23,27 @@ Help me set up a new blank project. Follow these steps:
 
 3. **Initialize git:**
    - Run `git init` in the new directory
+   - Rename branch to `main`
    - Create initial commit with message: "chore: initial project setup"
 
-4. **Provide GitHub setup instructions:**
-   - Show the user how to create a GitHub repo with the same name
-   - Provide the exact command to connect: `git remote add origin <url>`
-   - Provide the exact command to push: `git push -u origin main`
+4. **Set up GitHub remote:**
+   - The GitHub username is: `smhunt`
+   - Construct the GitHub URL: `https://github.com/smhunt/{project-name}.git`
+   - Run: `git remote add origin https://github.com/smhunt/{project-name}.git`
+   - Inform user they need to create the GitHub repo at: `https://github.com/new` with the name `{project-name}`
+   - After user confirms repo is created, run: `git push -u origin main`
 
-5. **Summary:**
+5. **Switch to the new project:**
+   - IMPORTANT: After everything is set up, switch the working directory to `~/code/{project-name}/`
+   - Confirm the switch by showing the current directory
+
+6. **Summary:**
    - Confirm project created at `~/code/{project-name}/`
    - Show git status
-   - List next steps
+   - Confirm we're now working in the new project directory
 
 IMPORTANT:
-- Don't switch directories - stay in the current project
 - Always use ~/code/ as the parent directory
+- GitHub username is always `smhunt`
+- MUST switch into the new directory at the end
 - Keep it simple - just create a blank project ready to start fresh

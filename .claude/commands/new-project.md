@@ -30,17 +30,16 @@ Help me set up a new blank project. Follow these steps:
    - The GitHub username is: `smhunt`
    - Construct the GitHub URL: `https://github.com/smhunt/{project-name}.git`
    - Run: `git remote add origin https://github.com/smhunt/{project-name}.git`
-   - Inform user they need to create the GitHub repo at: `https://github.com/new` with the name `{project-name}`
-   - After user confirms repo is created, run: `git push -u origin main`
 
-5. **Switch to the new project:**
-   - IMPORTANT: After everything is set up, switch the working directory to `~/code/{project-name}/`
-   - Confirm the switch by showing the current directory
+5. **Create GitHub repository and push:**
+   - Provide clickable link to create the repo: `https://github.com/new?name={project-name}&description={project-name}`
+   - Wait for user confirmation that repo is created
+   - Once confirmed, run: `git push -u origin main`
 
-6. **Summary:**
-   - Confirm project created at `~/code/{project-name}/`
-   - Show git status
-   - Confirm we're now working in the new project directory
+6. **Summary with clickable links:**
+   - Local folder: `file://~/code/{project-name}/`
+   - GitHub repo: `https://github.com/smhunt/{project-name}`
+   - Confirm project is ready and connected
 
 IMPORTANT:
 - Always use ~/code/ as the parent directory
